@@ -128,49 +128,32 @@
 
 <script>
     async function generateSummary() {
-        const videoUrl = document.getElementById('videoUrl').value;
-        const btn = document.getElementById('submitBtn');
-        const resultDiv = document.getElementById('result');
-        const loader = document.getElementById('loader');
+    const videoUrl = document.getElementById('videoUrl').value;
+    const btn = document.getElementById('submitBtn');
+    const resultDiv = document.getElementById('result');
 
-        if (!videoUrl) {
-            alert("Please paste a link first!");
-            return;
-        }
+    btn.disabled = true;
 
-        // UI Updates
-        btn.disabled = true;
-        loader.style.display = "block";
-        resultDiv.style.display = "none";
+    try {
+        // We use URLSearchParams to send a "Simple Request" which avoids the OPTIONS trigger
+        const params = new URLSearchParams();
+        params.append('video_url', videoUrl);
 
-        try {
-            const response = await fetch('http://localhost:5678/webhook/video-summarizer', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ 
-                    video_url: videoUrl // This matches the field name we'll use in n8n
-                })
-            });
+        const response = await fetch('http://localhost:5678/webhook/video-summarizer', {
+            method: 'POST',
+            body: params // Sending as form-data instead of JSON
+        });
 
-            if (!response.ok) throw new Error('Network response was not ok');
+        const data = await response.text();
+        resultDiv.style.display = "block";
+        resultDiv.innerHTML = data;
 
-            const data = await response.text();
-            
-            loader.style.display = "none";
-            resultDiv.style.display = "block";
-            resultDiv.innerHTML = data;
-
-        } catch (error) {
-            loader.style.display = "none";
-            resultDiv.style.display = "block";
-            resultDiv.innerHTML = "<span style='color: #f85149;'>Error: Could not connect to n8n. Make sure your local server is running and CORS is enabled.</span>";
-            console.error('Error:', error);
-        } finally {
-            btn.disabled = false;
-        }
+    } catch (error) {
+        resultDiv.innerHTML = "Connection Error. Make sure n8n is Active.";
+    } finally {
+        btn.disabled = false;
     }
+}
 </script>
 
 </body>
