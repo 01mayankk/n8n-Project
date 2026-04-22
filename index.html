@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -18,7 +17,6 @@ body {
   height: 100vh;
 }
 
-/* Container */
 .container {
   width: 90%;
   max-width: 800px;
@@ -29,13 +27,11 @@ body {
   box-shadow: 0 0 40px rgba(0,0,0,0.5);
 }
 
-/* Title */
 h1 {
   text-align: center;
   margin-bottom: 20px;
 }
 
-/* Input */
 .input-box {
   display: flex;
   gap: 10px;
@@ -50,7 +46,6 @@ input {
   font-size: 16px;
 }
 
-/* Button */
 button {
   padding: 12px 20px;
   border: none;
@@ -67,7 +62,6 @@ button:hover {
   opacity: 0.9;
 }
 
-/* Output */
 #output {
   margin-top: 20px;
   padding: 20px;
@@ -79,7 +73,6 @@ button:hover {
   line-height: 1.5;
 }
 
-/* Loader */
 .loader {
   border: 4px solid rgba(255,255,255,0.2);
   border-top: 4px solid #3b82f6;
@@ -94,7 +87,6 @@ button:hover {
   100% { transform: rotate(360deg); }
 }
 </style>
-
 </head>
 
 <body>
@@ -103,7 +95,7 @@ button:hover {
   <h1>📘 AI Notes Generator</h1>
 
   <div class="input-box">
-    <input id="topic" placeholder="Enter topic (e.g. Heap, Graph, DP)" />
+    <input id="topic" placeholder="Enter topic (Heap, Graph, DP)" />
     <button onclick="generate()">Generate</button>
   </div>
 
@@ -112,7 +104,7 @@ button:hover {
 
 <script>
 async function generate() {
-  const topic = document.getElementById("topic").value;
+  const topic = document.getElementById("topic").value.trim();
   const output = document.getElementById("output");
 
   if (!topic) {
@@ -123,7 +115,7 @@ async function generate() {
   output.innerHTML = '<div class="loader"></div>';
 
   try {
-    const res = await fetch("YOUR_WEBHOOK_URL_HERE", {
+    const res = await fetch("https://jackknife-iodine-harmonica.ngrok-free.dev/webhook/notes-generator", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -133,10 +125,15 @@ async function generate() {
 
     const data = await res.json();
 
-    output.innerText = data.result || JSON.stringify(data, null, 2);
+    // ✅ Extract Gemini response properly
+    const text =
+      data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+      "⚠️ No response received";
+
+    output.innerText = text;
 
   } catch (err) {
-    output.innerText = "❌ Error: " + err;
+    output.innerText = "❌ Error: " + err.message;
   }
 }
 </script>
